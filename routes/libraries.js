@@ -67,4 +67,36 @@ router.delete("/removeLibrary/:libraryId", authMiddleware, async (req, res) => {
   }
 });
 
+router.put("/updateLibrary/:libraryId", authMiddleware, async (req, res) => {
+  const { username } = req.user;
+  const id = req.params.libraryId;
+  const updatedData = req.body;
+  try {
+    const user = await User.findOne({ username });
+    const librairyExist = await Library.findOneAndUpdate(
+      {
+        _id: id,
+        user: user._id,
+      },
+      {
+        $set: {
+          status: updatedData.status,
+          likes: updatedData.likes,
+          dislikes: updatedData.dislikes,
+          journal: updatedData.journal,
+        },
+      },
+      { returnDocument: "after" },
+    );
+    if (!librairyExist) {
+      return res
+        .status(404)
+        .json({ result: false, error: "Lirairie non trouvée" });
+    }
+    res.json({ result: true, data: librairyExist });
+  } catch (err) {
+    res.status(500).send({ err });
+  }
+});
+
 module.exports = router;

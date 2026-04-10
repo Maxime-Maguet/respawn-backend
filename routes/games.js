@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Game = require("../models/games.js");
-module.exports = router;
+
 const RAWG_API_KEY = process.env.RAWG_API_KEY;
 
 router.get("/search", async (req, res) => {
@@ -15,7 +15,7 @@ router.get("/search", async (req, res) => {
 
     const gameInformations = data.results.map((data) => {
       return {
-        rawg: data.id,
+        rawgId: data.id,
         title: data.name,
         released: data.released,
         backgroundImage: data.background_image,
@@ -28,3 +28,5 @@ router.get("/search", async (req, res) => {
     res.status(500).json({ result: false, error: "Erreur serveur" });
   }
 });
+
+module.exports = router;

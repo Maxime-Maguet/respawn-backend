@@ -4,18 +4,30 @@ const Library = require("../models/libraries.js");
 const User = require("../models/users.js");
 const authMiddleware = require("../middleware/auth.js");
 const Game = require("../models/games.js");
+const RAWG_API_KEY = process.env.RAWG_API_KEY;
 
 router.post("/addGame", authMiddleware, async (req, res) => {
   const { rawgId } = req.body;
   const { username } = req.user;
+
   try {
     const user = await User.findOne({ username });
-    const game = await Game.findOne({ rawgId });
+    let game = await Game.findOne({ rawgId });
+
     if (!game) {
-      return res.status(401).json({
-        result: false,
-        erreur: "Jeu non trouvé",
+      const response = await fetch(
+        `https://api.rawg.io/api/games/${rawgId}?key=${RAWG_API_KEY}`,
+      );
+      const data = await response.json();
+      const newGame = new Game({
+        rawgId: data.id,
+        title: data.name,
+        released: data.released,
+        backgroundImage: data.background_image,
+        genres: data.genres,
       });
+      await newGame.save();
+      game = newGame;
     }
     const library = await Library.findOne({ game: game._id, user: user._id });
     if (library) {
@@ -30,6 +42,7 @@ router.post("/addGame", authMiddleware, async (req, res) => {
     }
   } catch (err) {
     res.status(500).json({ result: false, error: "Erreur serveur" });
+    console.error(err);
   }
 });
 

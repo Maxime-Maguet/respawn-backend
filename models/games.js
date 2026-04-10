@@ -6,7 +6,7 @@ const gameSchema = mongoose.Schema(
     title: String,
     released: String,
     backgroundImage: String,
-    genres: [String],
+    genres: [{ id: Number, name: String }],
     description: String,
   },
   { timestamps: true },

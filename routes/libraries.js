@@ -33,4 +33,18 @@ router.post("/addGame", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/", authMiddleware, async (req, res) => {
+  const { username } = req.user;
+  try {
+    const user = await User.findOne({ username });
+    const library = await Library.find({ user: user._id }).populate("game");
+    if (!library) {
+      res.status(404).json({ result: false, error: "Librairie non trouvée" });
+    }
+    res.json({ result: true, allData: library });
+  } catch (err) {
+    res.status(500).send({ err });
+  }
+});
+
 module.exports = router;

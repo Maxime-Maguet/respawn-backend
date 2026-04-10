@@ -47,4 +47,24 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
+router.delete("/removeLibrary/:libraryId", authMiddleware, async (req, res) => {
+  const { username } = req.user;
+  try {
+    const user = await User.findOne({ username });
+    const librairyExist = await Library.findOne({
+      _id: req.params.libraryId,
+      user: user._id,
+    });
+    if (!librairyExist) {
+      return res
+        .status(404)
+        .json({ result: false, details: "Librairie n'existe pas" });
+    }
+    await Library.findByIdAndDelete(req.params.libraryId);
+    res.status(200).json({ result: true, message: "Librairie supprimée" });
+  } catch (err) {
+    res.status(500).send({ err });
+  }
+});
+
 module.exports = router;

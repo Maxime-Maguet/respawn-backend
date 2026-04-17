@@ -66,4 +66,39 @@ router.get("/discover", async (req, res) => {
     res.status(500).json({ result: false, error: "Erreur serveur" });
   }
 });
+
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  if (!id) return res.status(400).json({ error: "ID manquant" });
+  try {
+    const response = await fetch(
+      `https://api.rawg.io/api/games/${id}?key=${RAWG_API_KEY}`,
+    );
+    const data = await response.json();
+
+    if (response.status !== 200) {
+      return res
+        .status(response.status)
+        .json({ result: false, error: "Jeu non trouvé" });
+    }
+    const gameDetails = {
+      rawgId: data.id,
+      title: data.name,
+      description: data.description_raw,
+      released: data.released,
+      backgroundImage: data.background_image,
+      rating: data.rating,
+      metacritic: data.metacritic,
+      genre: data.genres?.map((e) => e.name),
+      platforms: data.platforms?.map((e) => e.platform.name),
+      developers: data.developers?.map((e) => e.name),
+      communtyStats: data.added_by_status,
+    };
+    console.log(gameDetails);
+
+    res.json({ result: true, data: gameDetails });
+  } catch (error) {
+    res.status(500).json({ result: false, error: "Erreur serveur" });
+  }
+});
 module.exports = router;

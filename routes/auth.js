@@ -8,12 +8,21 @@ const secret_token = process.env.JWT_SECRET;
 
 router.post(
   "/signup",
-  body("email").trim().isEmail().normalizeEmail().withMessage("Email invalide"),
-  body("password")
-    .isLength({ min: 8 })
+  body("email")
     .notEmpty()
-    .withMessage("Le mot de passe doit contenir minimun 8 characteres "),
-  body("username").notEmpty(),
+    .withMessage("Veuillez renseigner Email")
+    .bail()
+    .trim()
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Email invalide"),
+  body("password")
+    .notEmpty()
+    .withMessage("Veuillez renseigner un mot de passe")
+    .bail()
+    .isLength({ min: 8 })
+    .withMessage("Le mot de passe doit contenir minimum 8 caractères"),
+  body("username").notEmpty().withMessage("veuillez renseigner un username"),
   async (req, res) => {
     try {
       const { email, username, password } = req.body;
@@ -23,23 +32,38 @@ router.post(
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const data = await User.findOne({ $or: [{ email }, { username }] });
-      if (data) {
-        res.json({ result: false, error: "Utilisateur existe déjà" });
-      } else {
-        const hash = await bcrypt.hash(password, 10);
-        const token = jwt.sign({ username }, secret_token, {
-          expiresIn: "1h",
+      const userAlreadyExist = await User.findOne({
+        $or: [{ email }, { username }],
+      });
+      if (userAlreadyExist) {
+        return res.status(400).json({
+          result: false,
+          errors: [
+            {
+              location: "body",
+              msg: "Utilisateur existe déjà!",
+              path: "email",
+              type: "field",
+            },
+          ],
         });
-        const newUser = new User({
-          username,
-          email,
-          password: hash,
-          token,
-        });
-        await newUser.save();
-        res.json({ result: true, user: { username, token } });
       }
+      const hash = await bcrypt.hash(password, 10);
+      const token = jwt.sign({ username }, secret_token, {
+        expiresIn: "1h",
+      });
+      const newUser = new User({
+        username,
+        email,
+        password: hash,
+        token,
+      });
+      await newUser.save();
+
+      const { password: hashedPassword, ...userWihoutPassword } =
+        newUser.toObject();
+
+      res.status(200).json({ result: true, data: userWihoutPassword });
     } catch (error) {
       res.status(500).json({ result: false, error: "Erreur serveur" });
     }
@@ -48,8 +72,10 @@ router.post(
 
 router.post(
   "/signin",
-  body("password").notEmpty(),
-  body("username").notEmpty(),
+  body("password")
+    .notEmpty()
+    .withMessage("veuillez renseigner un mot de passe"),
+  body("username").notEmpty().withMessage("veuillez renseigner un username"),
   async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -62,14 +88,14 @@ router.post(
       if (!user) {
         return res.status(401).json({
           result: false,
-          erreur: "Username ou mot de passe invalide",
+          errors: [{ msg: "Username ou mot de passe invalide" }],
         });
       }
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         return res.status(401).json({
           result: false,
-          error: "Username ou mot de passe invalide",
+          errors: [{ msg: "Username ou mot de passe invalide" }],
         });
       }
       const token = jwt.sign({ username }, secret_token, {

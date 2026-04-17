@@ -29,4 +29,41 @@ router.get("/search", async (req, res) => {
   }
 });
 
+router.get("/discover", async (req, res) => {
+  const { type } = req.query;
+  let params = "";
+  if (!params) {
+    return res.status(400).json({ result: true, error: "Type invalide" });
+  }
+  switch (type) {
+    case "trending":
+      params = "ordering=-rating&page_size=8";
+      break;
+    case "recent":
+      params = "ordering=-released&dates=2025-01-01,2025-12-31&page_size=8";
+      break;
+    case "upcoming":
+      params = `dates=2026-04-17,2026-12-31&ordering=-added&page_size=8`;
+      break;
+  }
+  try {
+    const response = await fetch(
+      `https://api.rawg.io/api/games?key=${RAWG_API_KEY}&${params}`,
+    );
+    const data = await response.json();
+    const gameInformations = data.results.map((data) => {
+      return {
+        rawgId: data.id,
+        title: data.name,
+        released: data.released,
+        backgroundImage: data.background_image,
+        genres: data.genres,
+      };
+    });
+
+    res.json(gameInformations);
+  } catch (error) {
+    res.status(500).json({ result: false, error: "Erreur serveur" });
+  }
+});
 module.exports = router;

@@ -31,7 +31,9 @@ router.post("/addGame", authMiddleware, async (req, res) => {
     }
     const library = await Library.findOne({ game: game._id, user: user._id });
     if (library) {
-      return res.json({ result: false, error: "Jeu déjà enregistré" });
+      return res
+        .status(409)
+        .json({ result: false, error: "Jeu déjà enregistré" });
     } else {
       const newLibrary = new Library({
         user: user._id,

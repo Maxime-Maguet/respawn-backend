@@ -37,13 +37,13 @@ router.get("/discover", async (req, res) => {
   }
   switch (type) {
     case "trending":
-      params = "ordering=-added&dates=2026-01-01,2026-12-31&page_size=8";
+      params = "ordering=-added&dates=2026-01-01,2026-12-31&page_size=20";
       break;
     case "recent":
-      params = "ordering=-released&dates=2025-01-01,2026-04-17&page_size=8 ";
+      params = "ordering=-released&dates=2025-01-01,2026-04-17&page_size=20 ";
       break;
     case "upcoming":
-      params = `dates=2026-04-17,2026-12-31&ordering=-added&page_size=8`;
+      params = `dates=2026-04-17,2026-12-31&ordering=-added&page_size=20`;
       break;
   }
   try {

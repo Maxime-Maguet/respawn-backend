@@ -7,6 +7,7 @@ const librarySchema = mongoose.Schema(
     status: {
       type: String,
       enum: ["en cours", "terminé", "abandonné", "pas encore joué"],
+      default: "pas encore joué",
     },
     rating: Number,
     likes: [String],

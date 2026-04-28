@@ -9,7 +9,11 @@ const librarySchema = mongoose.Schema(
       enum: ["en cours", "terminé", "abandonné", "pas encore joué"],
       default: "pas encore joué",
     },
-    rating: Number,
+    rating: {
+      type: String,
+      enum: ["exceptional", "recommended", "meh", "skip"],
+      default: null,
+    },
     likes: [String],
     dislikes: [String],
     journal: [{ date: Date, note: String }],

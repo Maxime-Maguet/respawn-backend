@@ -96,6 +96,7 @@ router.put("/updateLibrary/:libraryId", authMiddleware, async (req, res) => {
       {
         $set: {
           status: updatedData.status,
+          rating: updatedData.rating,
           likes: updatedData.likes,
           dislikes: updatedData.dislikes,
           journal: updatedData.journal,

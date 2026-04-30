@@ -87,20 +87,21 @@ router.put("/updateLibrary/:libraryId", authMiddleware, async (req, res) => {
   const id = req.params.libraryId;
   const updatedData = req.body;
   try {
+    const updates = {};
+    if (updatedData.status !== undefined) updates.status = updatedData.status;
+    if (updatedData.rating !== undefined) updates.rating = updatedData.rating;
+    if (updatedData.journal !== undefined)
+      updates.journal = updatedData.journal;
+
     const user = await User.findOne({ username });
     const librairyExist = await Library.findOneAndUpdate(
       {
         _id: id,
         user: user._id,
       },
+
       {
-        $set: {
-          status: updatedData.status,
-          rating: updatedData.rating,
-          likes: updatedData.likes,
-          dislikes: updatedData.dislikes,
-          journal: updatedData.journal,
-        },
+        $set: updates,
       },
       { returnDocument: "after" },
     );

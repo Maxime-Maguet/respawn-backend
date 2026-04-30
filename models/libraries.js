@@ -16,7 +16,7 @@ const librarySchema = mongoose.Schema(
     },
     likes: [String],
     dislikes: [String],
-    journal: [{ date: Date, note: String }],
+    journal: [{ date: Date, note: String, duration: Number }],
   },
   { timestamps: true },
 );

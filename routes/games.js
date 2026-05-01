@@ -81,6 +81,7 @@ router.get("/discover", async (req, res) => {
         released: data.released,
         backgroundImage: data.background_image,
         genres: data.genres,
+        platforms: (data.platforms || []).map((p) => p.platform.name),
       }));
 
     res.json(gameInformations);

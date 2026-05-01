@@ -103,7 +103,6 @@ router.get("/:id", async (req, res) => {
 
     const data = await gameResponse.json();
     const screenshotsData = await screenshotsResponse.json();
-    console.log("screenshot => ", screenshotsData);
 
     if (gameResponse.status !== 200 || screenshotsResponse.status !== 200) {
       return res.status(400).json({ result: false, error: "Jeu non trouvé" });
@@ -122,7 +121,6 @@ router.get("/:id", async (req, res) => {
       communtyStats: data.added_by_status,
       screenshots: screenshotsData.results?.map((s) => s.image),
     };
-    console.log(gameDetails);
 
     res.json({ result: true, data: gameDetails });
   } catch (error) {

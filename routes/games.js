@@ -32,18 +32,35 @@ router.get("/search", async (req, res) => {
 router.get("/discover", async (req, res) => {
   const { type } = req.query;
   let params = "";
+  const today = new Date();
+
+  const formatDate = (date) => date.toISOString().slice(0, 10);
+  const blacklistedTags = [
+    "nsfw",
+    "hentai",
+    "adult",
+    "nudity",
+    "sexual content",
+  ];
+
   if (!type) {
     return res.status(400).json({ result: true, error: "Type invalide" });
   }
   switch (type) {
     case "trending":
-      params = "ordering=-added&dates=2026-01-01,2026-12-31&page_size=60";
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(today.getDate() - 7);
+      params = `ordering=-added&dates=${formatDate(oneWeekAgo)},${formatDate(today)}&exclude_additions=true&page_size=60`;
       break;
     case "recent":
-      params = "ordering=-released&dates=2025-01-01,2026-04-17&page_size=60";
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(today.getMonth() - 3);
+      params = `ordering=-released&dates=${formatDate(threeMonthsAgo)},${formatDate(today)}&page_size=60`;
       break;
     case "upcoming":
-      params = `dates=2026-04-17,2026-12-31&ordering=-added&page_size=60`;
+      const inOneYear = new Date();
+      inOneYear.setMonth(today.getMonth() + 12);
+      params = `dates=${formatDate(today)},${formatDate(inOneYear)}&ordering=-added&page_size=60`;
       break;
   }
   try {
@@ -51,15 +68,20 @@ router.get("/discover", async (req, res) => {
       `https://api.rawg.io/api/games?key=${RAWG_API_KEY}&${params}`,
     );
     const data = await response.json();
-    const gameInformations = data.results.map((data) => {
-      return {
+    const gameInformations = data.results
+      .filter((game) => {
+        const tagNames = (game.tags || []).map(
+          (t) => t.slug?.toLowerCase() || "",
+        );
+        return !tagNames.some((tag) => blacklistedTags.includes(tag));
+      })
+      .map((data) => ({
         rawgId: data.id,
         title: data.name,
         released: data.released,
         backgroundImage: data.background_image,
         genres: data.genres,
-      };
-    });
+      }));
 
     res.json(gameInformations);
   } catch (error) {

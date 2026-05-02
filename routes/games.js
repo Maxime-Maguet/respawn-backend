@@ -106,7 +106,6 @@ router.get("/:id", async (req, res) => {
     const data = await gameResponse.json();
     const screenshotsData = await screenshotsResponse.json();
     const storesData = await storesResponse.json();
-    console.log(data.tags);
 
     if (
       gameResponse.status !== 200 ||
@@ -127,6 +126,8 @@ router.get("/:id", async (req, res) => {
       tags: data.tags?.map((t) => t.name),
       platforms: data.platforms?.map((e) => e.platform.name),
       developers: data.developers?.map((e) => e.name),
+      publisher: data.publishers?.map((p) => p.name),
+
       communtyStats: data.added_by_status,
       screenshots: screenshotsData.results?.map((s) => s.image),
       stores: storesData.results?.map((s) => s.url),

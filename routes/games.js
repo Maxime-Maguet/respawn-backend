@@ -106,6 +106,7 @@ router.get("/:id", async (req, res) => {
     const data = await gameResponse.json();
     const screenshotsData = await screenshotsResponse.json();
     const storesData = await storesResponse.json();
+    console.log(data.tags);
 
     if (
       gameResponse.status !== 200 ||
@@ -123,6 +124,7 @@ router.get("/:id", async (req, res) => {
       rating: data.rating,
       metacritic: data.metacritic,
       genre: data.genres?.map((e) => e.name),
+      tags: data.tags?.map((t) => t.name),
       platforms: data.platforms?.map((e) => e.platform.name),
       developers: data.developers?.map((e) => e.name),
       communtyStats: data.added_by_status,

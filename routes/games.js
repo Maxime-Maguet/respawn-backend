@@ -94,17 +94,24 @@ router.get("/:id", async (req, res) => {
   const { id } = req.params;
   if (!id) return res.status(400).json({ error: "ID manquant" });
   try {
-    const [gameResponse, screenshotsResponse] = await Promise.all([
-      fetch(`https://api.rawg.io/api/games/${id}?key=${RAWG_API_KEY}`),
-      fetch(
-        `https://api.rawg.io/api/games/${id}/screenshots?key=${RAWG_API_KEY}`,
-      ),
-    ]);
+    const [gameResponse, screenshotsResponse, storesResponse] =
+      await Promise.all([
+        fetch(`https://api.rawg.io/api/games/${id}?key=${RAWG_API_KEY}`),
+        fetch(
+          `https://api.rawg.io/api/games/${id}/screenshots?key=${RAWG_API_KEY}`,
+        ),
+        fetch(`https://api.rawg.io/api/games/${id}/stores?key=${RAWG_API_KEY}`),
+      ]);
 
     const data = await gameResponse.json();
     const screenshotsData = await screenshotsResponse.json();
+    const storesData = await storesResponse.json();
 
-    if (gameResponse.status !== 200 || screenshotsResponse.status !== 200) {
+    if (
+      gameResponse.status !== 200 ||
+      screenshotsResponse.status !== 200 ||
+      storesResponse.status !== 200
+    ) {
       return res.status(400).json({ result: false, error: "Jeu non trouvé" });
     }
     const gameDetails = {
@@ -120,6 +127,7 @@ router.get("/:id", async (req, res) => {
       developers: data.developers?.map((e) => e.name),
       communtyStats: data.added_by_status,
       screenshots: screenshotsData.results?.map((s) => s.image),
+      stores: storesData.results?.map((s) => s.url),
     };
 
     res.json({ result: true, data: gameDetails });

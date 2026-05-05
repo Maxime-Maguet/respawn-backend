@@ -14,6 +14,10 @@ const cors = require("cors");
 app.use(cors());
 app.use(express.json());
 
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
 app.use("/auth", authRouter);
 app.use("/game", gameRouter);
 app.use("/library", libraryRouter);

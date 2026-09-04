@@ -49,7 +49,7 @@ router.get("/discover", async (req, res) => {
   switch (type) {
     case "trending":
       const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(today.getDate() - 7);
+      oneWeekAgo.setDate(today.getDate() - 30);
       params = `ordering=-added&dates=${formatDate(oneWeekAgo)},${formatDate(today)}&exclude_additions=true&page_size=60`;
       break;
     case "recent":
